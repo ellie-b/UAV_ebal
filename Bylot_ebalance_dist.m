@@ -42,7 +42,6 @@ mj2w=1e6/3600;
 % constants for the energy balance model - these need to be set properly
 zAWS=368;     % altitude of the AWS site m
 PAWS=969;     % average air presure of the AWS site, mbar
-ice_albedo=geotiffread(albedofile);
 
 % for potential temperature and specific humidity calculations
 grav=9.81;    % m/s2
@@ -100,6 +99,12 @@ for n=jul1:aug1
     day(k)=floor(dday(n));   % current day
    
     % hourly radiation balance
+    if n<9547 %for days up to July 23
+        ice_albedo=geotiffread(albedofile1);
+    else
+        ice_albedo=geotiffread(albedofile2);
+    end
+    
     dSWin=geotiffread([location filenames{k+2}]); % hourly incoming radiation
     SWnet=dSWin*mj2w.*(1-ice_albedo);
     
