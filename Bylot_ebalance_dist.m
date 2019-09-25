@@ -4,12 +4,16 @@
 % Read in the AWS data
 % Headers are ignored by the matlab function xlsread
 clear all       % clears matlab memory
-data=xlsread('Bylot_AWSdata.xlsx');      % AWS data from 2015-2016
+data=xlsread('Bylot_AWSdata_nohead.xlsx');      % AWS data from 2015-2016
 ndata=size(data);
 ndat=ndata(1,1);
 
-albedofile1 = 'j21albLLadj.tif';
-albedofile2 = 'j23albLLadj.tif';
+albedofile1 = 'C:\Users\earbash\UAV_ebal_data\j21albLLadj.tif';
+albedofile2 = 'C:\Users\earbash\UAV_ebal_data\j23albLLadj.tif';
+
+%Read in modeled absorbed radiation at AWS for month of July
+SWabs_mod = csvread('aws_rad_allJuly2016.txt',1,1);
+SWabs_mod = SWabs_mod(:,1);
 
 ndays=365;
 nmonths=12;
@@ -83,7 +87,7 @@ SW_threshold=10;      % W/m2
 max_albedo=0.9;
 
 % set up solar radiation file location
-location = 'July2016_all\';
+location = 'C:\Users\earbash\UAV_ebal_data\July2016_all\';
 list = dir(location);
 filenames = {list.name}; % first two cells blank
 
@@ -106,10 +110,10 @@ for n=jul1:aug1
     end
     
     dSWin=geotiffread([location filenames{k+2}]); % hourly incoming radiation
-    SWnet=dSWin*mj2w.*(1-ice_albedo);
+    SWnet=dSWin.*(1-ice_albedo);
     
     % calculate temperature distribution
-    dTK = distribute_temp(SWnet,TK(n));
+    dTK = distribute_temp(SWabs_mod(k),SWnet,TK(n));
 
     % model the LW radiation from T, ev and RH (Ebrahimi, JGR, 2015)
     epsa=min(0.445+0.0055*RH(n)+0.0052*ev(n),1);
