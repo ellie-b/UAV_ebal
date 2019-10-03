@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Calculate glacier energy balance at the Bylot AWS site
+% Calculate glacier energy balance over UAV survey area of Fountain Glacier
 
 % Read in the AWS data
 % Headers are ignored by the matlab function xlsread
@@ -8,8 +8,10 @@ data=xlsread('Bylot_AWSdata_nohead.xlsx');      % AWS data from 2015-2016
 ndata=size(data);
 ndat=ndata(1,1);
 
-albedofile1 = 'C:\Users\earbash\UAV_ebal_data\j21albLLadj.tif';
-albedofile2 = 'C:\Users\earbash\UAV_ebal_data\j23albLLadj.tif';
+filepath = 'G:\Fountain_Fieldwork\yr2016\MeltModel\UAV_ebal_data'; %path to data directory
+
+albedofile1 = [filepath,'\j21albLLadj.tif'];
+albedofile2 = [filepath,'\j23albLLadj.tif'];
 
 %Read in modeled absorbed radiation at AWS for month of July
 SWabs_mod = csvread('aws_rad_allJuly2016.txt',1,1);
@@ -87,13 +89,13 @@ SW_threshold=10;      % W/m2
 max_albedo=0.9;
 
 % set up solar radiation file location
-location = 'C:\Users\earbash\UAV_ebal_data\July2016_all\';
+location = [filepath,'\July2016_all\'];
 list = dir(location);
 filenames = {list.name}; % first two cells blank
 
 %% calculate the 1-hour and daily energy balance at all points
 Nt=24;      % integrate 1-hour data; Nt = time steps per day
-cumPDD = 0;
+PDD = zeros(3294,7792);
 totalmelt = 0;
 % Just do calculations for July 2016 (dday 183-215)
 jul1=9014;
@@ -109,11 +111,13 @@ for n=jul1:aug1
         ice_albedo=geotiffread(albedofile2);
     end
     
-    dSWin=geotiffread([location filenames{k+2}]); % hourly incoming radiation
+    [dSWin,R]=geotiffread([location filenames{k+2}]); % hourly incoming radiation
     SWnet=dSWin.*(1-ice_albedo);
     
     % calculate temperature distribution
-    dTK = distribute_temp(SWabs_mod(k),SWnet,TK(n));
+    dTK = distribute_temp(SWnet(1885,911),SWnet,TK(n));
+    
+    SWnet = SWnet*mj2w; % convert absorbed radiation to Watts/m2 for calculations
 
     % model the LW radiation from T, ev and RH (Ebrahimi, JGR, 2015)
     epsa=min(0.445+0.0055*RH(n)+0.0052*ev(n),1);
@@ -152,27 +156,26 @@ for n=jul1:aug1
     melt = Emelt*1000/(rhow*Lf);    % mm melt/hour
     totalmelt = totalmelt+melt;
      
-    % calculate melting or refreezing       
-    if (T(n) >= 0)     % surface at 0 degC
-       PDD(k) = T(n)/Nt;  % PDD from this hour 
-    else
-       % air is below 0 degC, could be refeeezing
-       PDD(k) = 0;
-    end
-    cumPDD = cumPDD+PDD(k);
+%     % calculate melting or refreezing       
+%     PDD(dTK>=273.15) = (dTK(dTK>=0)-273.15)/Nt;    % surface at 0 degC, PDD from this hour
+%     
+%     % air is below 0 degC, could be refeeezing
+%     PDD(dTK<273.15) = 0;
     
     % save AWS location
-    aSWnet(k)=SWnet(1885,910);
-    aLWin(k)=LWin(1885,910);
+    aT(k)=dTK(1885,911)-273.15;
+    aPDD(k)=PDD(1885,911);
+    aSWnet(k)=SWnet(1885,911);
+    aLWin(k)=LWin(1885,911);
     aLWout(k)=LWout;
-    aLWnet(k)=LWnet(1885,910);
-    aQstar(k)=Qstar(1885,910);
-    aQH(k)=QH(1885,910);
+    aLWnet(k)=LWnet(1885,911);
+    aQstar(k)=Qstar(1885,911);
+    aQH(k)=QH(1885,911);
     aQE(k)=QE;
-    aQnet(k)=Qnet(1885,910);
-    aEnet(k)=Enet(1885,910);
-    aEmelt(k)=Emelt(1885,910);
-    amelt(k)=melt(1885,910);
+    aQnet(k)=Qnet(1885,911);
+    aEnet(k)=Enet(1885,911);
+    aEmelt(k)=Emelt(1885,911);
+    amelt(k)=melt(1885,911);
 
 end
 
@@ -203,17 +206,17 @@ for m=1:np
     Bylot_results(m,1)=m;   % period (counter)
     Bylot_results(m,2)=day(enddat);   % day in July
     Bylot_results(m,3)=2-mod(m,2);      % 1/2 for am/pm
-    Bylot_results(m,4)=mean(T(startdatd:enddatd));     % degC
-    Bylot_results(m,5)=sum(PDD(startdat:enddat));    % W/m2
+    Bylot_results(m,4)=mean(aT(startdatd:enddatd));     % degC
+    Bylot_results(m,5)=sum(aPDD(startdat:enddat));
     Bylot_results(m,6)=mean(aSWnet(startdat:enddat));  % W/m2
-    Bylot_results(m,8)=ice_albedo(1885,910);  % 
+    Bylot_results(m,8)=ice_albedo(1885,910);
     Bylot_results(m,9)=mean(aLWin(startdat:enddat));    % W/m2
     Bylot_results(m,10)=mean(aLWout(startdat:enddat));  % W/m2
     Bylot_results(m,11)=mean(aQstar(startdat:enddat));  % W/m2
     Bylot_results(m,12)=mean(aQH(startdat:enddat));     % W/m2
     Bylot_results(m,13)=mean(aQE(startdat:enddat));     % W/m2
     Bylot_results(m,14)=mean(aQnet(startdat:enddat));   % W/m2
-    Bylot_results(m,15)=sum(aEmelt(startdat:enddat)/1e3);  % kJ/m2
+    Bylot_results(m,15)=sum(aEmelt(startdat:enddat)/mj2w);  % MJ/m2
     Bylot_results(m,16)=sum(amelt(startdat:enddat));    % mm   
 end
         
