@@ -89,7 +89,7 @@ SW_threshold=10;      % W/m2
 max_albedo=0.9;
 
 % set up solar radiation file location
-location = [filepath,'\July2016_all'];
+location = [filepath,'\July2016_all_update'];
 list = dir(location);
 filenames = {list.name}; % first two cells blank
 
@@ -100,7 +100,7 @@ totalmelt = 0;
 % Just do calculations for July 2016 (dday 183-215)
 jul1=9014;
 aug1=9758;
-for n=jul1:aug1
+for n=jul1:9062
     k=n-jul1+1;    % index for hourly data
     day(k)=floor(dday(n));   % current day
    
@@ -165,6 +165,7 @@ for n=jul1:aug1
     % save AWS location
     aT(k)=dTK(1885,911)-273.15;
     albedo(k)=ice_albedo(1885,911);
+    aSWin(k) = dSWin(1885,911);
     aSWnet(k)=SWnet(1885,911);
     aLWin(k)=LWin(1885,911);
     aLWout(k)=LWout;
@@ -195,7 +196,7 @@ QnetJul=mean(aQnet)
 
 %% Calculate 12-hour diagnostics from the month
 np=31*2;       % number of periods, month of July
-nfields=15;    % output fields, model results
+nfields=16;    % output fields, model results
 Bylot_results=zeros(np,nfields);
 ndat_period=12;    % 12 data points per period
 for m=1:np
@@ -209,16 +210,17 @@ for m=1:np
     Bylot_results(m,3)=2-mod(m,2);      % 1/2 for am/pm
     Bylot_results(m,4)=mean(T(startdatd:enddatd));     % degC
     Bylot_results(m,5)=mean(aT(startdat:enddat));     % degC
-    Bylot_results(m,6)=mean(aSWnet(startdat:enddat));  % W/m2
-    Bylot_results(m,7)=albedo(enddat);
-    Bylot_results(m,8)=mean(aLWin(startdat:enddat));    % W/m2
-    Bylot_results(m,9)=mean(aLWout(startdat:enddat));  % W/m2
-    Bylot_results(m,10)=mean(aQstar(startdat:enddat));  % W/m2
-    Bylot_results(m,11)=mean(aQH(startdat:enddat));     % W/m2
-    Bylot_results(m,12)=mean(aQE(startdat:enddat));     % W/m2
-    Bylot_results(m,13)=mean(aQnet(startdat:enddat));   % W/m2
-    Bylot_results(m,14)=sum(aEmelt(startdat:enddat)/1e6);  % MJ/m2
-    Bylot_results(m,15)=sum(amelt(startdat:enddat));    % mm   
+    Bylot_results(m,6)=mean(aSWin(startdat:enddat));  % W/m2
+    Bylot_results(m,7)=mean(aSWnet(startdat:enddat));  % W/m2
+    Bylot_results(m,8)=albedo(enddat);
+    Bylot_results(m,9)=mean(aLWin(startdat:enddat));    % W/m2
+    Bylot_results(m,10)=mean(aLWout(startdat:enddat));  % W/m2
+    Bylot_results(m,11)=mean(aQstar(startdat:enddat));  % W/m2
+    Bylot_results(m,12)=mean(aQH(startdat:enddat));     % W/m2
+    Bylot_results(m,13)=mean(aQE(startdat:enddat));     % W/m2
+    Bylot_results(m,14)=mean(aQnet(startdat:enddat));   % W/m2
+    Bylot_results(m,15)=sum(aEmelt(startdat:enddat)/1e6);  % MJ/m2
+    Bylot_results(m,16)=sum(amelt(startdat:enddat));    % mm   
 end
 
 save 'Distributed_ebalance_July2016.dat' Bylot_results -ascii
