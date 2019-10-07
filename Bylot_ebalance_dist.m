@@ -100,7 +100,7 @@ totalmelt = 0;
 % Just do calculations for July 2016 (dday 183-215)
 jul1=9014;
 aug1=9758;
-for n=jul1:9062
+for n=jul1:aug1
     k=n-jul1+1;    % index for hourly data
     day(k)=floor(dday(n));   % current day
    
@@ -210,7 +210,7 @@ for m=1:np
     Bylot_results(m,3)=2-mod(m,2);      % 1/2 for am/pm
     Bylot_results(m,4)=mean(T(startdatd:enddatd));     % degC
     Bylot_results(m,5)=mean(aT(startdat:enddat));     % degC
-    Bylot_results(m,6)=mean(aSWin(startdat:enddat));  % W/m2
+    Bylot_results(m,6)=mean(aSWin(startdat:enddat))*mj2w;  % W/m2
     Bylot_results(m,7)=mean(aSWnet(startdat:enddat));  % W/m2
     Bylot_results(m,8)=albedo(enddat);
     Bylot_results(m,9)=mean(aLWin(startdat:enddat));    % W/m2
