@@ -26,7 +26,7 @@ firstyear=2015;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Start procssing the AWS data
 year=data(:,1);
-dday=data(:,2);
+dday=round(data(:,2),2);
 Tn=data(:,5);
 T=data(:,6);
 Tx=data(:,7);
@@ -111,7 +111,7 @@ for n=jul1:aug1
         ice_albedo=geotiffread(albedofile2);
     end
     
-    dSWin=geotiffread([location '\' filenames{k+2}]); % hourly incoming radiation
+    [dSWin,R]=geotiffread([location '\' filenames{k+2}]); % hourly incoming radiation
     SWnet=dSWin.*(1-ice_albedo);
     
     % calculate temperature distribution
@@ -155,13 +155,12 @@ for n=jul1:aug1
     
     melt = Emelt*1000/(rhow*Lf);    % mm melt/hour
     totalmelt = totalmelt+melt;
-     
-%     % calculate melting or refreezing       
-%     PDD(dTK>=273.15) = (dTK(dTK>=0)-273.15)/Nt;    % surface at 0 degC, PDD from this hour
-%     
-%     % air is below 0 degC, could be refeeezing
-%     PDD(dTK<273.15) = 0;
     
+    % save melt grid
+    dt = split(filenames{k+2},'_');
+    newname = [filepath '\DistributedMelt\melt_' dt{3} '_' dt{4}];
+    geotiffwrite(newname,melt,R)
+      
     % save AWS location
     aT(k)=dTK(1885,911)-273.15;
     albedo(k)=ice_albedo(1885,911);
@@ -178,6 +177,7 @@ for n=jul1:aug1
     aEmelt(k)=Emelt(1885,911);
     amelt(k)=melt(1885,911);
 
+    waitbar(k/(aug1-jul1))
 end
 
 %% mean July diagnostics

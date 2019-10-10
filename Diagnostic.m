@@ -1,10 +1,9 @@
 %% Plot temoerature matrix
-Temp=dTK-273.15;
-imagesc(Temp)
-contour(Temp)
-contourf(Temp)
-pcolor(Temp)
-surf(Temp, 'edgecolor', 'none'); view(2);
+imagesc(melt)
+contour(melt)
+contourf(melt)
+pcolor(melt)
+surf(melt, 'edgecolor', 'none'); view(2);
 
 geotiffwrite('G:\Fountain_Fieldwork\yr2016\MeltModel\UAV_ebal_data\Temp_diagnosis\dT_Aug1_1885911.tif',Temp,R)
 
