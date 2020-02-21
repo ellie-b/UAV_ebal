@@ -56,8 +56,8 @@ rhow=1000;    % density of water, kg/m3
 sigma=5.67e-8;   % Stefan-Boltzmann constant
 epss=1.0;       % emissivity for melting snow,ice
 % constants for turbulent fluxes
-z=1.5;           % assume constant, 1.5 m, for now
-z0=0.001;        % 1 mm, a customary number
+zm=1.5;           % assume constant, 1.5 m, for now
+z0=0.003;        % 1 mm, a customary number
 z0H=z0/100;
 z0E=z0H;         % roughness length scales (m)
 kvk=0.4;         % von Karman
@@ -115,14 +115,10 @@ for n=jul1:aug1
     Tpot=TK(n)*(Pref/PAWS)^gamma;
     Tpots=TKs*(Pref/PAWS)^gamma;
     % Calculate turbulent fluxes with no stability corrections
-    zm=1.5;     % measurement height, assume 1.5 m
-    z0=0.001;   % 1 mm, a customary number
     % saturation vapour pressure in mbar
     evsurf=6.112*exp(22.46*TCs/(276.62+TCs));  % mbar: WMO (2008), over water
     % humidity
     qvs=eps*evsurf*1000/(PAWS-evsurf);     % specific humidity (g/kg) 
-    z0H=z0/100;
-    z0E=z0H;      % roughness length scales for QH and QE (m)
     denom=log(zm/z0)*log(zm/z0H);
 
     QH(k)=rho(n)*cp*kvk^2*wind(n)*(Tpot-Tpots)/denom;
@@ -172,7 +168,7 @@ for m=1:np
     startdat=1+(m-1)*ndat_period;   % start of 12-hr period
     enddat=m*ndat_period;           % end of 12-hr period
     startdatd=startdat+jul1-1;      % index, original dataset
-    enddatd=startdat+jul1-1;        % index, original dataset
+    enddatd=enddat+jul1-1;        % index, original dataset
     % averages or sums for this period
     Bylot_results(m,1)=m;   % period (counter)
     Bylot_results(m,2)=day(enddat);   % day in July
@@ -188,11 +184,11 @@ for m=1:np
     Bylot_results(m,12)=mean(QH(startdat:enddat));     % W/m2
     Bylot_results(m,13)=mean(QE(startdat:enddat));     % W/m2
     Bylot_results(m,14)=mean(Qnet(startdat:enddat));   % W/m2
-    Bylot_results(m,15)=sum(Emelt(startdat:enddat)/1e3);  % kJ/m2
+    Bylot_results(m,15)=sum(Emelt(startdat:enddat)/1e6);  % MJ/m2
     Bylot_results(m,16)=sum(melt(startdat:enddat));    % mm   
 end
         
-save 'Bylot_Ebalance_July2016.dat' Bylot_results -ascii        
+%save 'Bylot_Ebalance_z.dat' Bylot_results -ascii        
 
 %% Calculate daily diagnostics from the month
 np=31;       % number of periods, month of July
@@ -203,7 +199,7 @@ for m=1:np
     startdat=1+(m-1)*ndat_period;   % start of 12-hr period
     enddat=m*ndat_period;           % end of 12-hr period
     startdatd=startdat+jul1-1;      % index, original dataset
-    enddatd=startdat+jul1-1;        % index, original dataset
+    enddatd=enddat+jul1-1;        % index, original dataset
     % averages or sums for this period
     Bylot_results_daily(m,1)=m;   % period (counter)
     Bylot_results_daily(m,2)=day(enddat);   % day in July
@@ -218,7 +214,7 @@ for m=1:np
     Bylot_results_daily(m,11)=mean(QH(startdat:enddat));     % W/m2
     Bylot_results_daily(m,12)=mean(QE(startdat:enddat));     % W/m2
     Bylot_results_daily(m,13)=mean(Qnet(startdat:enddat));   % W/m2
-    Bylot_results_daily(m,14)=sum(Emelt(startdat:enddat)/1e3);  % kJ/m2
+    Bylot_results_daily(m,14)=sum(Emelt(startdat:enddat)/1e6);  % MJ/m2
     Bylot_results_daily(m,15)=sum(melt(startdat:enddat));    % mm   
 end
         
