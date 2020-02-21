@@ -221,7 +221,7 @@ for m=1:np
     Bylot_results(m,16)=sum(amelt(startdat:enddat));    % mm   
 end
 
-save 'Distributed_ebalance_July2016_z005.dat' Bylot_results -ascii
+save 'Distributed_ebalance_July2016.dat' Bylot_results -ascii
 
 %% Calculate daily diagnostics from the month
 np=31;       % number of periods, month of July
