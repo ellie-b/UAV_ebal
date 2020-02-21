@@ -63,8 +63,8 @@ rhow=1000;    % density of water, kg/m3
 sigma=5.67e-8;   % Stefan-Boltzmann constant
 epss=1.0;       % emissivity for melting snow,ice
 % constants for turbulent fluxes
-z=1.5;           % assume constant, 1.5 m, for now
-z0=0.001;        % 1 mm, a customary number
+zm=1.5;           % assume constant, 1.5 m, for now
+z0=0.005;        % 1 mm, a customary number
 z0H=z0/100;
 z0E=z0H;         % roughness length scales (m)
 kvk=0.4;         % von Karman
@@ -135,8 +135,6 @@ for n=jul1:aug1
     Tpot=dTK*(Pref/PAWS)^gamma;
     Tpots=TKs*(Pref/PAWS)^gamma;
     % Calculate turbulent fluxes with no stability corrections
-    zm=1.5;     % measurement height, assume 1.5 m
-    z0=0.001;   % 1 mm, a customary number
     % saturation vapour pressure in mbar
     evsurf=6.112*exp(22.46*TCs/(276.62+TCs));  % mbar: WMO (2008), over water
     % humidity
